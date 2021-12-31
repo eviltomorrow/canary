@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = "./;pb";
+package canary;
+
+service System {
+    rpc Version(google.protobuf.Empty) returns (VersionResponse){}
+    rpc Info(google.protobuf.Empty) returns (InfoResponse){}
+}
+
+message InfoResponse {
+    string pid = 1;
+    string pwd = 2;
+    string launch_time = 3;
+    string hostname = 4;
+    string os = 5;
+    string arch = 6;
+    string runnint_time = 7;
+    string ip = 8;
+}
+
+message VersionResponse {
+    string current_version = 1;
+    string go_version = 2;
+    string go_os_arch = 3;
+    string git_sha = 4;
+    string git_tag = 5;
+    string git_branch = 6;
+    string build_time = 7; 
+}
+
