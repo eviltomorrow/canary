@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = "./;pb";
+package canary;
+
+service File {
+
+}
