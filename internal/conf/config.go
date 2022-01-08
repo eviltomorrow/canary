@@ -9,23 +9,26 @@ import (
 )
 
 type Config struct {
-	Log    Log    `json:"log" toml:"log"`
 	System System `json:"system" toml:"system"`
+	Log    Log    `json:"log" toml:"log"`
+	Server Server `json:"server" toml:"server"`
+}
+
+type System struct {
+	RootDir string `json:"root-dir" toml:"root-dir"`
+	FileDir string `json:"file-dir" toml:"file_dir"`
 }
 
 type Log struct {
 	DisableTimestamp bool   `json:"disable-timestamp" toml:"disable-timestamp"`
 	Level            string `json:"level" toml:"level"`
 	Format           string `json:"format" toml:"format"`
-	FileName         string `json:"filename" toml:"filename"`
 	MaxSize          int    `json:"maxsize" toml:"maxsize"`
 }
 
-type System struct {
-	Host     string `json:"host" toml:"host"`
-	Port     int    `json:"port" toml:"port"`
-	CertsDir string `json:"certs-dir" toml:"certs-dir"`
-	RootDir  string `json:"root-dir" toml:"root-dir"`
+type Server struct {
+	Host string `json:"host" toml:"host"`
+	Port int    `json:"port" toml:"port"`
 }
 
 func (c *Config) Load(path string, override func(cfg *Config)) error {
@@ -69,7 +72,6 @@ var Global = &Config{
 		DisableTimestamp: false,
 		Level:            "info",
 		Format:           "text",
-		FileName:         "/tmp/canary/data.log",
 		MaxSize:          20,
 	},
 }

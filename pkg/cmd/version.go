@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/eviltomorrow/canary/pkg/client"
@@ -24,18 +25,17 @@ var versionCmd = &cobra.Command{
 }
 
 var (
-	ServerName string
+	ServerName = "www.roigo.top"
 	ServerHost string
 	ServerPort int
-	CaCert     string
-	ClientCert string
-	ClientKey  string
+	CertsDir   string
 	timeout    = 10 * time.Second
 )
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
 }
+
 func printClientVersion() {
 	var buf bytes.Buffer
 	buf.WriteString("Client: \r\n")
@@ -52,7 +52,7 @@ func printClientVersion() {
 func printServerVersion() {
 	var buf bytes.Buffer
 	buf.WriteString("Server: \r\n")
-	creds, err := client.WithTLS(ServerName, CaCert, ClientKey, ClientCert)
+	creds, err := client.WithTLS(ServerName, filepath.Join(CertsDir, "ca.crt"), filepath.Join(CertsDir, "client.pem"), filepath.Join(CertsDir, "client.crt"))
 	if err != nil {
 		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
 		os.Exit(0)
