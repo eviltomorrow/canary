@@ -53,13 +53,16 @@ test:
 	@echo "$(CGREEN)=> Run all test cases ...$(CEND)"
 	@go test $(LDFLAGS) -timeout 10m -race ./...
 	@echo "$(CGREEN)=> Test Success!$(CEND)"
-			
-# compile
+
+# Compile
+.PHONY: compile	
 compile:
 	@echo "$(CGREEN)=> Compile protobuf ...$(CEND)"
 	@bash scripts/compile.sh
 
+
 # Builds the project
+.PHONY: build
 build: fmt
 	@mkdir examples/bin
 	@mkdir examples/etc
