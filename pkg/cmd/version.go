@@ -77,18 +77,33 @@ func printServerVersion() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	resp, err := stub.Version(ctx, &emptypb.Empty{})
+	version, err := stub.Version(ctx, &emptypb.Empty{})
 	if err != nil {
 		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
 		fmt.Println(buf.String())
 		os.Exit(0)
 	}
-	buf.WriteString(fmt.Sprintf("   Canary Version (Current): %s\r\n", resp.CurrentVersion))
-	buf.WriteString(fmt.Sprintf("   Go Version: %v\r\n", resp.GoVersion))
-	buf.WriteString(fmt.Sprintf("   Go OS/Arch: %v\r\n", resp.GoOsArch))
-	buf.WriteString(fmt.Sprintf("   Git Sha: %v\r\n", resp.GitSha))
-	buf.WriteString(fmt.Sprintf("   Git Tag: %v\r\n", resp.GitTag))
-	buf.WriteString(fmt.Sprintf("   Git Branch: %v\r\n", resp.GitBranch))
-	buf.WriteString(fmt.Sprintf("   Build Time: %v\r\n", resp.BuildTime))
+	info, err := stub.Info(ctx, &emptypb.Empty{})
+	if err != nil {
+		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
+		fmt.Println(buf.String())
+		os.Exit(0)
+	}
+	buf.WriteString(fmt.Sprintf("   Canary Version (Current): %s\r\n", version.CurrentVersion))
+	buf.WriteString(fmt.Sprintf("   Go Version: %v\r\n", version.GoVersion))
+	buf.WriteString(fmt.Sprintf("   Go OS/Arch: %v\r\n", version.GoOsArch))
+	buf.WriteString(fmt.Sprintf("   Git Sha: %v\r\n", version.GitSha))
+	buf.WriteString(fmt.Sprintf("   Git Tag: %v\r\n", version.GitTag))
+	buf.WriteString(fmt.Sprintf("   Git Branch: %v\r\n", version.GitBranch))
+	buf.WriteString(fmt.Sprintf("   Build Time: %v\r\n", version.BuildTime))
+
+	buf.WriteString(fmt.Sprintf("   Pid: %v\r\n", info.Pid))
+	buf.WriteString(fmt.Sprintf("   Pwd: %v\r\n", info.Pwd))
+	buf.WriteString(fmt.Sprintf("   Launch Time: %v\r\n", info.LaunchTime))
+	buf.WriteString(fmt.Sprintf("   Hostname: %v\r\n", info.Hostname))
+	buf.WriteString(fmt.Sprintf("   OS: %v\r\n", info.Os))
+	buf.WriteString(fmt.Sprintf("   Arch: %v\r\n", info.Arch))
+	buf.WriteString(fmt.Sprintf("   Running Time: %v\r\n", info.RunningTime))
+	buf.WriteString(fmt.Sprintf("   Ip: %v\r\n", info.Ip))
 	fmt.Println(buf.String())
 }

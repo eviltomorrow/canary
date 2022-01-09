@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"net"
@@ -21,15 +23,36 @@ var initCmd = &cobra.Command{
 		if err := cfg.Load(path, nil); err != nil {
 			log.Fatalf("[Fatal] Load config failure, nest error: %v\r\n", err)
 		}
+		if err := os.MkdirAll(filepath.Join(cfg.System.RootDir, "certs"), 0755); err != nil {
+			log.Fatalf("[Fatal] Create certs path failure, nest error: %v\r\n", err)
+		}
+		if isServer {
+			if err := loadAndCreateCertificate(true, filepath.Join(cfg.System.RootDir, "certs"), "ca"); err != nil {
+				log.Fatalf("[Fatal] Create ca certificate failure, nest error: %v\r\n", err)
+			}
+			fmt.Printf("[OK] Create ca cert/key success!\r\n")
+
+			if err := loadAndCreateCertificate(false, filepath.Join(cfg.System.RootDir, "certs"), "server"); err != nil {
+				log.Fatalf("[Fatal] Create server certificate failure, nest error: %v\r\n", err)
+			}
+			fmt.Printf("[OK] Create server cert/key success!\r\n")
+
+		} else {
+			if err := loadAndCreateCertificate(false, filepath.Join(cfg.System.RootDir, "certs"), "client"); err != nil {
+				log.Fatalf("[Fatal] Create client certificate failure, nest error: %v\r\n", err)
+			}
+			fmt.Printf("[OK] Create client cert/key success!\r\n")
+		}
 	},
 }
 
 func init() {
 	initCmd.Flags().StringVarP(&path, "config", "c", "config.toml", "Canary's config file")
+	ctlCmd.AddCommand(initCmd)
 	serverCmd.AddCommand(initCmd)
 }
 
-func loadAndCreateCertficate(isCa bool, certsDir, name string) error {
+func loadAndCreateCertificate(isCA bool, certsDir, name string) error {
 	findFile := func(path string) error {
 		fi, err := os.Stat(path)
 		if err != nil {
@@ -55,60 +78,25 @@ func loadAndCreateCertficate(isCa bool, certsDir, name string) error {
 	}
 
 	if !exist {
-		caCert, err := certificate.ReadCertificate(filepath.Join(certsDir, "ca.crt"))
-		if err != nil {
-			return err
-		}
-		caKey, err := certificate.ReadPKCS1PrivateKey(filepath.Join(certsDir, "ca.pem"))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createCertficateCS(name string) error {
-	findFile := func(path string) error {
-		fi, err := os.Stat(path)
-		if err != nil {
-			return err
-		}
-		if fi.IsDir() {
-			return fmt.Errorf("panic: [%s] is a folder", path)
-		}
-		return nil
-	}
-	for _, path := range []string{filepath.Join(CertsDir, "ca.crt"), filepath.Join(CertsDir, "ca.pem")} {
-		if err := findFile(path); err != nil {
-			return err
-		}
-	}
-
-	var ok = true
-	for _, path := range []string{filepath.Join(CertsDir, "server.crt"), filepath.Join(CertsDir, "server.pem")} {
-		err := findFile(path)
-		if err == nil {
-			continue
-		}
-		if !os.IsNotExist(err) {
-			return err
-		}
-		ok = false
-		break
-	}
-	if !ok {
-		caCert, err := certificate.ReadCertificate(filepath.Join(CertsDir, "ca.crt"))
-		if err != nil {
-			return err
-		}
-		caKey, err := certificate.ReadPKCS1PrivateKey(filepath.Join(CertsDir, "ca.pem"))
-		if err != nil {
-			return err
+		var (
+			caCert *x509.Certificate
+			caKey  *rsa.PrivateKey
+			err    error
+		)
+		if !isCA {
+			caCert, err = certificate.ReadCertificate(filepath.Join(certsDir, "ca.crt"))
+			if err != nil {
+				return err
+			}
+			caKey, err = certificate.ReadPKCS1PrivateKey(filepath.Join(certsDir, "ca.pem"))
+			if err != nil {
+				return err
+			}
 		}
 
-		serverKey, serverCert, err := certificate.GenerateCertificate(caKey, caCert, 2048, &certificate.ApplicationInformation{
+		key, cert, err := certificate.GenerateCertificate(caKey, caCert, 2048, &certificate.ApplicationInformation{
 			CertificateConfig: &certificate.CertificateConfig{
-				IsCA: false,
+				IsCA: isCA,
 				IP: []net.IP{
 					net.ParseIP(system.IP),
 				},
@@ -119,15 +107,15 @@ func createCertficateCS(name string) error {
 			ProvinceName:         "BeiJing",
 			LocalityName:         "BeiJing",
 			OrganizationName:     "Roigo &Inc",
-			OrganizationUnitName: "developer",
+			OrganizationUnitName: "Developer",
 		})
 		if err != nil {
 			return err
 		}
-		if err := certificate.WriteCertificate(filepath.Join(CertsDir, "server.crt"), serverCert); err != nil {
+		if err := certificate.WriteCertificate(filepath.Join(certsDir, fmt.Sprintf("%s.crt", name)), cert); err != nil {
 			return err
 		}
-		if err := certificate.WritePKCS1PrivateKey(filepath.Join(CertsDir, "server.pem"), serverKey); err != nil {
+		if err := certificate.WritePKCS1PrivateKey(filepath.Join(certsDir, fmt.Sprintf("%s.pem", name)), key); err != nil {
 			return err
 		}
 	}

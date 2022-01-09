@@ -1,5 +1,5 @@
 [system]
-root-dir = "/tmp/canary"
+root-dir = "."
 file-dir = "."
 
 [log]

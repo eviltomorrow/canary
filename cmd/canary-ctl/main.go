@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/eviltomorrow/canary/pkg/cmd"
-	"github.com/eviltomorrow/robber-core/pkg/system"
+	"github.com/eviltomorrow/canary/pkg/system"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 )
 
 func setVersion() {
-	system.MainVersion = MainVersion
+	system.CurrentVersion = MainVersion
 	system.GitSha = GitSha
 	system.GitTag = GitTag
 	system.GitBranch = GitBranch

@@ -17,7 +17,7 @@ message InfoResponse {
     string hostname = 4;
     string os = 5;
     string arch = 6;
-    string runnint_time = 7;
+    string running_time = 7;
     string ip = 8;
 }
 
