@@ -6,14 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/eviltomorrow/canary/internal/certificate"
 	"github.com/eviltomorrow/canary/pkg/middleware"
 	"github.com/eviltomorrow/canary/pkg/zlog"
-	"github.com/eviltomorrow/robber-core/pkg/system"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -28,78 +24,7 @@ var (
 	server *grpc.Server
 )
 
-func checkAndCreate() error {
-	findFile := func(path string) error {
-		fi, err := os.Stat(path)
-		if err != nil {
-			return err
-		}
-		if fi.IsDir() {
-			return fmt.Errorf("panic: [%s] is a folder", path)
-		}
-		return nil
-	}
-	for _, path := range []string{filepath.Join(CertsDir, "ca.crt"), filepath.Join(CertsDir, "ca.pem")} {
-		if err := findFile(path); err != nil {
-			return err
-		}
-	}
-
-	var ok = true
-	for _, path := range []string{filepath.Join(CertsDir, "server.crt"), filepath.Join(CertsDir, "server.pem")} {
-		err := findFile(path)
-		if err == nil {
-			continue
-		}
-		if !os.IsNotExist(err) {
-			return err
-		}
-		ok = false
-		break
-	}
-	if !ok {
-		caCert, err := certificate.ReadCertificate(filepath.Join(CertsDir, "ca.crt"))
-		if err != nil {
-			return err
-		}
-		caKey, err := certificate.ReadPKCS1PrivateKey(filepath.Join(CertsDir, "ca.pem"))
-		if err != nil {
-			return err
-		}
-
-		serverKey, serverCert, err := certificate.GenerateCertificate(caKey, caCert, 2048, &certificate.ApplicationInformation{
-			CertificateConfig: &certificate.CertificateConfig{
-				IsCA: false,
-				IP: []net.IP{
-					net.ParseIP(system.IP),
-				},
-				ExpirationTime: 24 * time.Hour * 365 * 3,
-			},
-			CommonName:           "www.roigo.top",
-			CountryName:          "China",
-			ProvinceName:         "BeiJing",
-			LocalityName:         "BeiJing",
-			OrganizationName:     "Roigo &Inc",
-			OrganizationUnitName: "developer",
-		})
-		if err != nil {
-			return err
-		}
-		if err := certificate.WriteCertificate(filepath.Join(CertsDir, "server.crt"), serverCert); err != nil {
-			return err
-		}
-		if err := certificate.WritePKCS1PrivateKey(filepath.Join(CertsDir, "server.pem"), serverKey); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func StartupGRPC() error {
-	if err := checkAndCreate(); err != nil {
-		return err
-	}
-
 	cert, err := tls.LoadX509KeyPair(filepath.Join(CertsDir, "server.crt"), filepath.Join(CertsDir, "server.pem"))
 	if err != nil {
 		return err

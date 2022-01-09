@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -19,6 +20,9 @@ var versionCmd = &cobra.Command{
 	Short: "Print version about canary",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		if err := cfg.Load(path, nil); err != nil {
+			log.Fatalf("[Fatal] Load config failure, nest error: %v\r\n", err)
+		}
 		printClientVersion()
 		printServerVersion()
 	},
@@ -26,14 +30,13 @@ var versionCmd = &cobra.Command{
 
 var (
 	ServerName = "www.roigo.top"
-	ServerHost string
-	ServerPort int
-	CertsDir   string
 	timeout    = 10 * time.Second
 )
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	versionCmd.Flags().StringVarP(&path, "config", "c", "config.toml", "Canary's config file")
+	ctlCmd.AddCommand(versionCmd)
+	serverCmd.AddCommand(versionCmd)
 }
 
 func printClientVersion() {
@@ -50,17 +53,23 @@ func printClientVersion() {
 }
 
 func printServerVersion() {
+	if isServer {
+		return
+	}
 	var buf bytes.Buffer
 	buf.WriteString("Server: \r\n")
-	creds, err := client.WithTLS(ServerName, filepath.Join(CertsDir, "ca.crt"), filepath.Join(CertsDir, "client.pem"), filepath.Join(CertsDir, "client.crt"))
+
+	creds, err := client.WithTLS(ServerName, filepath.Join(cfg.System.RootDir, "certs", "ca.crt"), filepath.Join(cfg.System.RootDir, "certs", "client.pem"), filepath.Join(cfg.System.RootDir, "certs", "client.crt"))
 	if err != nil {
 		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
+		fmt.Println(buf.String())
 		os.Exit(0)
 	}
 
-	stub, close, err := client.NewSystem(ServerHost, ServerPort, creds, timeout)
+	stub, close, err := client.NewSystem(cfg.Server.Host, cfg.Server.Port, creds, timeout)
 	if err != nil {
 		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
+		fmt.Println(buf.String())
 		os.Exit(0)
 	}
 	defer close()
@@ -71,6 +80,7 @@ func printServerVersion() {
 	resp, err := stub.Version(ctx, &emptypb.Empty{})
 	if err != nil {
 		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
+		fmt.Println(buf.String())
 		os.Exit(0)
 	}
 	buf.WriteString(fmt.Sprintf("   Canary Version (Current): %s\r\n", resp.CurrentVersion))

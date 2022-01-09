@@ -14,17 +14,30 @@ import (
 	"go.uber.org/zap"
 )
 
-var rootCmd = &cobra.Command{
+var serverCmd = &cobra.Command{
 	Use:   "canary-server",
 	Short: "",
-	Long:  "  \r\nCanary-server is running",
+	Long:  "  \r\nCanary-server is daemon for file transfer",
 	Run: func(cmd *cobra.Command, args []string) {
-		zlog.Info("Prepare to startup canary", zap.String("conf", cfg.String()))
+		if err := cfg.Load(path, nil); err != nil {
+			log.Fatalf("[Fatal] Load config failure, nest error: %v\r\n", err)
+		}
 
-		registerCleanFunc(server.ShutdownGRPC)
+		setVars := func() {
+			server.Host = cfg.Server.Host
+			server.Port = cfg.Server.Port
+			server.CertsDir = filepath.Join(cfg.System.RootDir, "certs")
+		}
+		setLog()
+		setVars()
+
+		zlog.Info("Try to startup canary", zap.String("conf", cfg.String()))
 		if err := server.StartupGRPC(); err != nil {
 			zlog.Fatal("Startup GRPC server failure", zap.Error(err))
 		}
+		zlog.Info("Canary startup complete", zap.String("status", "OK"))
+
+		registerCleanFunc(server.ShutdownGRPC)
 		blockingUntilTermination()
 	},
 }
@@ -33,13 +46,14 @@ var (
 	cleanFuncs []func() error
 	path       string
 	cfg        = conf.Global
+	isServer   bool
 )
 
 func init() {
-	rootCmd.CompletionOptions = cobra.CompletionOptions{
+	serverCmd.CompletionOptions = cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	}
-	rootCmd.Flags().StringVarP(&path, "config", "c", "config.toml", "Canary's config file")
+	serverCmd.Flags().StringVarP(&path, "config", "c", "config.toml", "Canary's config file")
 }
 
 func setLog() {
@@ -80,25 +94,7 @@ func blockingUntilTermination() {
 	}
 }
 
-func NewClient() {
-	cobra.CheckErr(rootCmd.Execute())
-}
-
 func NewServer() {
-	if err := cfg.Load(path, nil); err != nil {
-		log.Fatalf("[Fatal] Load config failure, nest error: %v\r\n", err)
-	}
-
-	setVars := func() {
-		server.Host = cfg.Server.Host
-		server.Port = cfg.Server.Port
-		server.CertsDir = filepath.Join(cfg.System.RootDir, "etc", "certs")
-
-		ServerHost = server.Host
-		ServerPort = server.Port
-		CertsDir = server.CertsDir
-	}
-	setLog()
-	setVars()
-	cobra.CheckErr(rootCmd.Execute())
+	isServer = true
+	cobra.CheckErr(serverCmd.Execute())
 }

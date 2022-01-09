@@ -16,3 +16,5 @@
 
 tests/certs/*.crt
 tests/certs/*.pem
+
+examples/canary-*

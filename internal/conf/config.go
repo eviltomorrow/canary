@@ -2,6 +2,7 @@ package conf
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -49,7 +50,7 @@ func (c *Config) Load(path string, override func(cfg *Config)) error {
 				return path, nil
 			}
 		}
-		return "", nil
+		return "", fmt.Errorf("not found conf file, possible conf %v", possibleConf)
 	}
 	conf, err := findPath()
 	if err != nil {

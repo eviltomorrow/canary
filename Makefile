@@ -59,12 +59,17 @@ compile:
 	@echo "$(CGREEN)=> Compile protobuf ...$(CEND)"
 	@bash scripts/compile.sh
 
+build_server: fmt
+	@echo "$(CGREEN)=> Building server...$(CEND)"
+	go build -race ${LDFLAGS} ${GCFLAGS} -o examples/canary-server cmd/canary-server/main.go
+	@echo "$(CGREEN)=> Build server Success!$(CEND)"
+
+build_client: fmt
+	@echo "$(CGREEN)=> Building client...$(CEND)"
+	go build -race ${LDFLAGS} ${GCFLAGS} -o examples/canary-ctl cmd/canary-ctl/main.go
+	@echo "$(CGREEN)=> Build client Success!$(CEND)"
+	
 # Builds the project
-build: fmt
-	BINARY=robber-repository
-	GOFILE=cmd/robber-repository.go
-	@echo "$(CGREEN)=> Building ...$(CEND)"
-	go build -race ${LDFLAGS} ${GCFLAGS} -o examples/${BINARY} ${GOFILE}
-	@echo "$(CGREEN)=> Build Success!$(CEND)"
+build: build_server build_client
 
 
