@@ -9,6 +9,7 @@ import (
 
 	"github.com/eviltomorrow/canary/internal/conf"
 	"github.com/eviltomorrow/canary/internal/server"
+	"github.com/eviltomorrow/canary/pkg/system"
 	"github.com/eviltomorrow/canary/pkg/zlog"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -26,7 +27,7 @@ var serverCmd = &cobra.Command{
 		setVars := func() {
 			server.Host = cfg.Server.Host
 			server.Port = cfg.Server.Port
-			server.CertsDir = filepath.Join(cfg.System.RootDir, "certs")
+			server.CertsDir = filepath.Join(system.Pwd, "certs")
 		}
 		setLog()
 		setVars()
@@ -62,7 +63,7 @@ func setLog() {
 		Format:           cfg.Log.Format,
 		DisableTimestamp: cfg.Log.DisableTimestamp,
 		File: zlog.FileLogConfig{
-			Filename:   filepath.Join(cfg.System.RootDir, "log", "data.log"),
+			Filename:   filepath.Join(system.Pwd, "log", "data.log"),
 			MaxSize:    cfg.Log.MaxSize,
 			MaxDays:    30,
 			MaxBackups: 30,

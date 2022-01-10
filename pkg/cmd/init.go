@@ -23,22 +23,22 @@ var initCmd = &cobra.Command{
 		if err := cfg.Load(path, nil); err != nil {
 			log.Fatalf("[Fatal] Load config failure, nest error: %v\r\n", err)
 		}
-		if err := os.MkdirAll(filepath.Join(cfg.System.RootDir, "certs"), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Join(system.Pwd, "certs"), 0755); err != nil {
 			log.Fatalf("[Fatal] Create certs path failure, nest error: %v\r\n", err)
 		}
 		if isServer {
-			if err := loadAndCreateCertificate(true, filepath.Join(cfg.System.RootDir, "certs"), "ca"); err != nil {
+			if err := loadAndCreateCertificate(true, filepath.Join(system.Pwd, "certs"), "ca"); err != nil {
 				log.Fatalf("[Fatal] Create ca certificate failure, nest error: %v\r\n", err)
 			}
 			fmt.Printf("[OK] Create ca cert/key success!\r\n")
 
-			if err := loadAndCreateCertificate(false, filepath.Join(cfg.System.RootDir, "certs"), "server"); err != nil {
+			if err := loadAndCreateCertificate(false, filepath.Join(system.Pwd, "certs"), "server"); err != nil {
 				log.Fatalf("[Fatal] Create server certificate failure, nest error: %v\r\n", err)
 			}
 			fmt.Printf("[OK] Create server cert/key success!\r\n")
 
 		} else {
-			if err := loadAndCreateCertificate(false, filepath.Join(cfg.System.RootDir, "certs"), "client"); err != nil {
+			if err := loadAndCreateCertificate(false, filepath.Join(system.Pwd, "certs"), "client"); err != nil {
 				log.Fatalf("[Fatal] Create client certificate failure, nest error: %v\r\n", err)
 			}
 			fmt.Printf("[OK] Create client cert/key success!\r\n")

@@ -19,3 +19,5 @@ tests/certs/*.pem
 
 examples/bin
 examples/etc
+examples/certs
+examples/log

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/eviltomorrow/canary/pkg/system"
 )
 
 type Config struct {
@@ -16,8 +17,7 @@ type Config struct {
 }
 
 type System struct {
-	RootDir string `json:"root-dir" toml:"root-dir"`
-	FileDir string `json:"file-dir" toml:"file_dir"`
+	FileDir string `json:"file-dir" toml:"file-dir"`
 }
 
 type Log struct {
@@ -36,6 +36,7 @@ func (c *Config) Load(path string, override func(cfg *Config)) error {
 	findPath := func() (string, error) {
 		var possibleConf = []string{
 			path,
+			filepath.Join(system.Pwd, "etc/config.toml"),
 			"../etc/config.toml",
 		}
 		for _, path := range possibleConf {

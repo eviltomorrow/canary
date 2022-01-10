@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -9,15 +8,14 @@ import (
 	"net"
 	"path/filepath"
 
+	"github.com/eviltomorrow/canary/internal/service"
 	"github.com/eviltomorrow/canary/pkg/middleware"
 	"github.com/eviltomorrow/canary/pkg/pb"
-	"github.com/eviltomorrow/canary/pkg/system"
 	"github.com/eviltomorrow/canary/pkg/zlog"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -27,37 +25,6 @@ var (
 
 	server *grpc.Server
 )
-
-type GRPC struct {
-	pb.UnimplementedSystemServer
-}
-
-func (g *GRPC) Version(ctx context.Context, _ *emptypb.Empty) (*pb.VersionResponse, error) {
-	resp := &pb.VersionResponse{
-		CurrentVersion: system.CurrentVersion,
-		GoVersion:      system.GoVersion,
-		GoOsArch:       system.GoOSArch,
-		GitSha:         system.GitSha,
-		GitTag:         system.GitTag,
-		GitBranch:      system.GitBranch,
-		BuildTime:      system.BuildTime,
-	}
-	return resp, nil
-}
-
-func (g *GRPC) Info(ctx context.Context, _ *emptypb.Empty) (*pb.InfoResponse, error) {
-	resp := &pb.InfoResponse{
-		Pid:         fmt.Sprintf("%d", system.Pid),
-		Pwd:         system.Pwd,
-		LaunchTime:  system.LaunchTime.Format("2006-01-02"),
-		Hostname:    system.HostName,
-		Os:          system.OS,
-		Arch:        system.Arch,
-		RunningTime: system.RunningTime(),
-		Ip:          system.IP,
-	}
-	return resp, nil
-}
 
 func StartupGRPC() error {
 	cert, err := tls.LoadX509KeyPair(filepath.Join(CertsDir, "server.crt"), filepath.Join(CertsDir, "server.pem"))
@@ -110,7 +77,7 @@ func StartupGRPC() error {
 		),
 	)
 	reflection.Register(server)
-	pb.RegisterSystemServer(server, &GRPC{})
+	pb.RegisterSystemServer(server, &service.System{})
 
 	go func() {
 		if err := server.Serve(listen); err != nil {

@@ -64,8 +64,8 @@ compile:
 # Builds the project
 .PHONY: build
 build: fmt
-	@mkdir examples/bin
-	@mkdir examples/etc
+	@mkdir -p examples/bin
+	@mkdir -p examples/etc
 	@cp configs/config.toml examples/etc/config.toml
 	@echo "$(CGREEN)=> Building binary...$(CEND)"
 	go build -race ${LDFLAGS} ${GCFLAGS} -o examples/bin/canary-server cmd/canary-server/main.go

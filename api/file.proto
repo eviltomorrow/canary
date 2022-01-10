@@ -6,5 +6,34 @@ option go_package = "./;pb";
 package canary;
 
 service File {
+    rpc Compare(stream FileInfo) returns (stream FileTodo){}
+    rpc Push(stream FileData) returns (google.protobuf.Empty){}
+}
 
+message FileInfo {
+    string path = 1;
+    enum FileType {
+        DIR = 0;
+        FILE = 1;
+    }
+    FileType type = 2;
+    int64 size = 3;
+    string md5 = 4;
+    uint32 mode = 5;
+}
+
+message FileTodo {
+    string path = 1;
+    enum FileAction {
+        NOCHANGE = 0;
+        ADD = 1;
+        UPDATE = 2;
+    }
+    FileAction action = 2;
+
+}
+
+message FileData {
+    FileInfo info = 1;
+    bytes data = 2;
 }

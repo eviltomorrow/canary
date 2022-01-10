@@ -59,7 +59,7 @@ func printServerVersion() {
 	var buf bytes.Buffer
 	buf.WriteString("Server: \r\n")
 
-	creds, err := client.WithTLS(ServerName, filepath.Join(cfg.System.RootDir, "certs", "ca.crt"), filepath.Join(cfg.System.RootDir, "certs", "client.pem"), filepath.Join(cfg.System.RootDir, "certs", "client.crt"))
+	creds, err := client.WithTLS(ServerName, filepath.Join(system.Pwd, "certs", "ca.crt"), filepath.Join(system.Pwd, "certs", "client.pem"), filepath.Join(system.Pwd, "certs", "client.crt"))
 	if err != nil {
 		buf.WriteString(fmt.Sprintf("   [Fatal] %v\r\n", err))
 		fmt.Println(buf.String())
@@ -96,7 +96,7 @@ func printServerVersion() {
 	buf.WriteString(fmt.Sprintf("   Git Tag: %v\r\n", version.GitTag))
 	buf.WriteString(fmt.Sprintf("   Git Branch: %v\r\n", version.GitBranch))
 	buf.WriteString(fmt.Sprintf("   Build Time: %v\r\n", version.BuildTime))
-
+	buf.WriteString("\r\n")
 	buf.WriteString(fmt.Sprintf("   Pid: %v\r\n", info.Pid))
 	buf.WriteString(fmt.Sprintf("   Pwd: %v\r\n", info.Pwd))
 	buf.WriteString(fmt.Sprintf("   Launch Time: %v\r\n", info.LaunchTime))

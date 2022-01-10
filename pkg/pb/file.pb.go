@@ -9,8 +9,9 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/emptypb"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -20,23 +21,365 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type FileInfo_FileType int32
+
+const (
+	FileInfo_DIR  FileInfo_FileType = 0
+	FileInfo_FILE FileInfo_FileType = 1
+)
+
+// Enum value maps for FileInfo_FileType.
+var (
+	FileInfo_FileType_name = map[int32]string{
+		0: "DIR",
+		1: "FILE",
+	}
+	FileInfo_FileType_value = map[string]int32{
+		"DIR":  0,
+		"FILE": 1,
+	}
+)
+
+func (x FileInfo_FileType) Enum() *FileInfo_FileType {
+	p := new(FileInfo_FileType)
+	*p = x
+	return p
+}
+
+func (x FileInfo_FileType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FileInfo_FileType) Descriptor() protoreflect.EnumDescriptor {
+	return file_file_proto_enumTypes[0].Descriptor()
+}
+
+func (FileInfo_FileType) Type() protoreflect.EnumType {
+	return &file_file_proto_enumTypes[0]
+}
+
+func (x FileInfo_FileType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FileInfo_FileType.Descriptor instead.
+func (FileInfo_FileType) EnumDescriptor() ([]byte, []int) {
+	return file_file_proto_rawDescGZIP(), []int{0, 0}
+}
+
+type FileTodo_FileAction int32
+
+const (
+	FileTodo_NOCHANGE FileTodo_FileAction = 0
+	FileTodo_ADD      FileTodo_FileAction = 1
+	FileTodo_UPDATE   FileTodo_FileAction = 2
+)
+
+// Enum value maps for FileTodo_FileAction.
+var (
+	FileTodo_FileAction_name = map[int32]string{
+		0: "NOCHANGE",
+		1: "ADD",
+		2: "UPDATE",
+	}
+	FileTodo_FileAction_value = map[string]int32{
+		"NOCHANGE": 0,
+		"ADD":      1,
+		"UPDATE":   2,
+	}
+)
+
+func (x FileTodo_FileAction) Enum() *FileTodo_FileAction {
+	p := new(FileTodo_FileAction)
+	*p = x
+	return p
+}
+
+func (x FileTodo_FileAction) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FileTodo_FileAction) Descriptor() protoreflect.EnumDescriptor {
+	return file_file_proto_enumTypes[1].Descriptor()
+}
+
+func (FileTodo_FileAction) Type() protoreflect.EnumType {
+	return &file_file_proto_enumTypes[1]
+}
+
+func (x FileTodo_FileAction) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FileTodo_FileAction.Descriptor instead.
+func (FileTodo_FileAction) EnumDescriptor() ([]byte, []int) {
+	return file_file_proto_rawDescGZIP(), []int{1, 0}
+}
+
+type FileInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Path string            `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	Type FileInfo_FileType `protobuf:"varint,2,opt,name=type,proto3,enum=canary.FileInfo_FileType" json:"type,omitempty"`
+	Size int64             `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	Md5  string            `protobuf:"bytes,4,opt,name=md5,proto3" json:"md5,omitempty"`
+	Mode uint32            `protobuf:"varint,5,opt,name=mode,proto3" json:"mode,omitempty"`
+}
+
+func (x *FileInfo) Reset() {
+	*x = FileInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_file_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FileInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileInfo) ProtoMessage() {}
+
+func (x *FileInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_file_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileInfo.ProtoReflect.Descriptor instead.
+func (*FileInfo) Descriptor() ([]byte, []int) {
+	return file_file_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *FileInfo) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *FileInfo) GetType() FileInfo_FileType {
+	if x != nil {
+		return x.Type
+	}
+	return FileInfo_DIR
+}
+
+func (x *FileInfo) GetSize() int64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
+func (x *FileInfo) GetMd5() string {
+	if x != nil {
+		return x.Md5
+	}
+	return ""
+}
+
+func (x *FileInfo) GetMode() uint32 {
+	if x != nil {
+		return x.Mode
+	}
+	return 0
+}
+
+type FileTodo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Path   string              `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	Action FileTodo_FileAction `protobuf:"varint,2,opt,name=action,proto3,enum=canary.FileTodo_FileAction" json:"action,omitempty"`
+}
+
+func (x *FileTodo) Reset() {
+	*x = FileTodo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_file_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FileTodo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileTodo) ProtoMessage() {}
+
+func (x *FileTodo) ProtoReflect() protoreflect.Message {
+	mi := &file_file_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileTodo.ProtoReflect.Descriptor instead.
+func (*FileTodo) Descriptor() ([]byte, []int) {
+	return file_file_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *FileTodo) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *FileTodo) GetAction() FileTodo_FileAction {
+	if x != nil {
+		return x.Action
+	}
+	return FileTodo_NOCHANGE
+}
+
+type FileData struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Info *FileInfo `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
+	Data []byte    `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *FileData) Reset() {
+	*x = FileData{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_file_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FileData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileData) ProtoMessage() {}
+
+func (x *FileData) ProtoReflect() protoreflect.Message {
+	mi := &file_file_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileData.ProtoReflect.Descriptor instead.
+func (*FileData) Descriptor() ([]byte, []int) {
+	return file_file_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *FileData) GetInfo() *FileInfo {
+	if x != nil {
+		return x.Info
+	}
+	return nil
+}
+
+func (x *FileData) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
 var File_file_proto protoreflect.FileDescriptor
 
 var file_file_proto_rawDesc = []byte{
 	0x0a, 0x0a, 0x66, 0x69, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x63, 0x61,
 	0x6e, 0x61, 0x72, 0x79, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x32, 0x06, 0x0a, 0x04, 0x46, 0x69, 0x6c, 0x65, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2f, 0x3b,
-	0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x22, 0xa6, 0x01, 0x0a, 0x08, 0x46, 0x69, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12,
+	0x0a, 0x04, 0x70, 0x61, 0x74, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61,
+	0x74, 0x68, 0x12, 0x2d, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e,
+	0x32, 0x19, 0x2e, 0x63, 0x61, 0x6e, 0x61, 0x72, 0x79, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x49, 0x6e,
+	0x66, 0x6f, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x04, 0x73, 0x69, 0x7a, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x64, 0x35, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x03, 0x6d, 0x64, 0x35, 0x12, 0x12, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x1d, 0x0a, 0x08, 0x46,
+	0x69, 0x6c, 0x65, 0x54, 0x79, 0x70, 0x65, 0x12, 0x07, 0x0a, 0x03, 0x44, 0x49, 0x52, 0x10, 0x00,
+	0x12, 0x08, 0x0a, 0x04, 0x46, 0x49, 0x4c, 0x45, 0x10, 0x01, 0x22, 0x84, 0x01, 0x0a, 0x08, 0x46,
+	0x69, 0x6c, 0x65, 0x54, 0x6f, 0x64, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x74, 0x68, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x12, 0x33, 0x0a, 0x06, 0x61,
+	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x1b, 0x2e, 0x63, 0x61,
+	0x6e, 0x61, 0x72, 0x79, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x54, 0x6f, 0x64, 0x6f, 0x2e, 0x46, 0x69,
+	0x6c, 0x65, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x22, 0x2f, 0x0a, 0x0a, 0x46, 0x69, 0x6c, 0x65, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0c,
+	0x0a, 0x08, 0x4e, 0x4f, 0x43, 0x48, 0x41, 0x4e, 0x47, 0x45, 0x10, 0x00, 0x12, 0x07, 0x0a, 0x03,
+	0x41, 0x44, 0x44, 0x10, 0x01, 0x12, 0x0a, 0x0a, 0x06, 0x55, 0x50, 0x44, 0x41, 0x54, 0x45, 0x10,
+	0x02, 0x22, 0x44, 0x0a, 0x08, 0x46, 0x69, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x12, 0x24, 0x0a,
+	0x04, 0x69, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x63, 0x61,
+	0x6e, 0x61, 0x72, 0x79, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04, 0x69,
+	0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x32, 0x71, 0x0a, 0x04, 0x46, 0x69, 0x6c, 0x65, 0x12,
+	0x33, 0x0a, 0x07, 0x43, 0x6f, 0x6d, 0x70, 0x61, 0x72, 0x65, 0x12, 0x10, 0x2e, 0x63, 0x61, 0x6e,
+	0x61, 0x72, 0x79, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x1a, 0x10, 0x2e, 0x63,
+	0x61, 0x6e, 0x61, 0x72, 0x79, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x54, 0x6f, 0x64, 0x6f, 0x22, 0x00,
+	0x28, 0x01, 0x30, 0x01, 0x12, 0x34, 0x0a, 0x04, 0x50, 0x75, 0x73, 0x68, 0x12, 0x10, 0x2e, 0x63,
+	0x61, 0x6e, 0x61, 0x72, 0x79, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x16,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x28, 0x01, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2f,
+	0x3b, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
-var file_file_proto_goTypes = []interface{}{}
+var (
+	file_file_proto_rawDescOnce sync.Once
+	file_file_proto_rawDescData = file_file_proto_rawDesc
+)
+
+func file_file_proto_rawDescGZIP() []byte {
+	file_file_proto_rawDescOnce.Do(func() {
+		file_file_proto_rawDescData = protoimpl.X.CompressGZIP(file_file_proto_rawDescData)
+	})
+	return file_file_proto_rawDescData
+}
+
+var file_file_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_file_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_file_proto_goTypes = []interface{}{
+	(FileInfo_FileType)(0),   // 0: canary.FileInfo.FileType
+	(FileTodo_FileAction)(0), // 1: canary.FileTodo.FileAction
+	(*FileInfo)(nil),         // 2: canary.FileInfo
+	(*FileTodo)(nil),         // 3: canary.FileTodo
+	(*FileData)(nil),         // 4: canary.FileData
+	(*emptypb.Empty)(nil),    // 5: google.protobuf.Empty
+}
 var file_file_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: canary.FileInfo.type:type_name -> canary.FileInfo.FileType
+	1, // 1: canary.FileTodo.action:type_name -> canary.FileTodo.FileAction
+	2, // 2: canary.FileData.info:type_name -> canary.FileInfo
+	2, // 3: canary.File.Compare:input_type -> canary.FileInfo
+	4, // 4: canary.File.Push:input_type -> canary.FileData
+	3, // 5: canary.File.Compare:output_type -> canary.FileTodo
+	5, // 6: canary.File.Push:output_type -> google.protobuf.Empty
+	5, // [5:7] is the sub-list for method output_type
+	3, // [3:5] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_file_proto_init() }
@@ -44,18 +387,58 @@ func file_file_proto_init() {
 	if File_file_proto != nil {
 		return
 	}
+	if !protoimpl.UnsafeEnabled {
+		file_file_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FileInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_file_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FileTodo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_file_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FileData); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_file_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   0,
+			NumEnums:      2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_file_proto_goTypes,
 		DependencyIndexes: file_file_proto_depIdxs,
+		EnumInfos:         file_file_proto_enumTypes,
+		MessageInfos:      file_file_proto_msgTypes,
 	}.Build()
 	File_file_proto = out.File
 	file_file_proto_rawDesc = nil

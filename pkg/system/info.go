@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/eviltomorrow/canary/pkg/znet"
@@ -25,10 +26,16 @@ var (
 )
 
 func init() {
-	var err error
-	Pwd, err = filepath.Abs(".")
+	path, err := os.Executable()
 	if err != nil {
-		panic(fmt.Errorf("get curent folder failure, nest error: %v", err))
+		panic(fmt.Errorf("get execute path failure, nest error: %v", err))
+	}
+	path = strings.ReplaceAll(path, "bin/canary-server", "")
+	path = strings.ReplaceAll(path, "bin/canary-ctl", "")
+
+	Pwd, err = filepath.Abs(path)
+	if err != nil {
+		panic(fmt.Errorf("get current folder failure, nest error: %v", err))
 	}
 	HostName, err = os.Hostname()
 	if err != nil {
