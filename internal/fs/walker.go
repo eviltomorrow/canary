@@ -1,5 +1,0 @@
-package fs
-
-func Walk() {
-
-}
