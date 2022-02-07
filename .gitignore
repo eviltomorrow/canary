@@ -21,3 +21,5 @@ examples/bin
 examples/etc
 examples/certs
 examples/log
+
+.gitpod.yml
